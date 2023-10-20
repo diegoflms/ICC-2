@@ -1,5 +1,6 @@
 // TRABALHO 05 ICC2 (adenilso)
 // usa o perfil "337" no thanos com o "few values" que ajuda
+// sobre essa nova versão: a contagem do quick do anterior era sem recursão, essa tá com. e o shell tá retornando tb, ao inves da variavel.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,8 +15,8 @@ void vetorfracionado (int f, int vet[], int temp[]) {
 
 // shell do ads
 // as alterações do arquivo q ele soltou vão estar marcadas com "#"
-void shell(int v[], int n, int *op) { // #
-    *op = 0; // #
+int shell(int v[], int n) { // #
+    int op = 0; // #
     int gap = 1;
     while(gap <= n) {
         gap *= 2;
@@ -24,43 +25,45 @@ void shell(int v[], int n, int *op) { // #
     while(gap > 0) {
         for (int i = gap; i < n; i++){
             int x = v[i]; // uma op
-            (*op)++; // #
+            op++; // #
             int j = i - gap;
             while(v[j] > x && j >= 0) { // uma op, # (inverteu a ordem)
                 v[j + gap] = v[j]; // uma op
                 j -= gap;
-                (*op) = (*op) + 2; // #
+                op += 2; // #
             }
             if (j >= 0) // #
-                (*op)++; // #
+                op++; // #
             v[j + gap] = x; // uma op
-            (*op)++; // #
+            op++; // #
         }
         gap /= 2;
     }
+    return op; // #
 }
 
 // quick do ads
 // as alterações do arquivo q ele soltou vão estar marcadas com "#"
-void quick(int v[], int f, int l, int *op) { // #
+int quick(int v[], int f, int l) { // #
+    int op = 0; // #
     if (f >= l) {
-        return;
+        return 0; // #
     }
     int m = (l + f)/2;
     int pivot = v[m]; // uma op
     int i = f;
     int j = l;
-    (*op)++; // #
+    op++; // #
     while(1) {
-        while(v[i] < pivot) {
+        while(v[i] < pivot) { // uma op
             i++;
-            (*op)++; // uma op
+            op++; // #
         }
-        while(v[j] > pivot) {
+        while(v[j] > pivot) { // uma op
             j--;
-            (*op)++; // uma op
+            op++; // #
         }
-        (*op) = (*op) + 2; // #
+        op += 2; // #
 
         if (i >= j) {
             break;
@@ -70,10 +73,11 @@ void quick(int v[], int f, int l, int *op) { // #
         v[j] = aux;
         i++;
         j--;
-        (*op) = (*op) + 3; // #
+        op += 3; // #
     }
-    quick(v, f, j, op);
-    quick(v, j+1, l, op);
+    op += quick(v, f, j); // #
+    op += quick(v, j+1, l); // #
+    return op; // #
 }
 
 int main() {
@@ -107,33 +111,36 @@ int main() {
 //            printf("%d ", tempS[j]);
 //        printf("\n");
 
-        // variavel pra salvar a qtd de operações, ja ordena o vet logo em sequida
-        int opQ = 0;
-        quick(tempQ, 0, i, &opQ);
-
-        // bloco de texto pra ver se o quick tá ordenando
-//        printf("quicj: ");
-//        for (int j = 0; j < i+1; j++)
-//            printf("%d-%d ", tempQ[j], opQ);
-//        printf("\n");
-
-        // variavel pra salvar a qtd de operações, ja ordena o vet logo em sequida
-        int opS = 0;
-        shell(tempS, i+1, &opS);
-
-        // bloco de texto pra ver se o shell tá ordenando
-//        printf("shell: ");
-//        for (int j = 0; j < i+1; j++)
-//            printf("%d-%d ", tempS[j], opS);
-//        printf("\n");
-
         // print noq o ads quer
-        if (opQ < opS)
+        if (quick(tempQ, 0, i) < shell(tempS, i+1))
             printf("Q");
-        else if (opQ > opS)
+        else if (quick(tempQ, 0, i) > shell(tempS, i+1))
             printf("S");
         else
             printf("-");
+
+//        // bloco de texto pra ver se o quick tá ordenando
+//        printf("quicj ordenado: ");
+//        for (int j = 0; j < i+1; j++)
+//            printf("%d ", tempQ[j]);
+//        printf("\n");
+//
+//        // bloco de texto pra ver se o shell tá ordenando
+//        printf("shell ordenado: ");
+//        for (int j = 0; j < i+1; j++)
+//            printf("%d ", tempS[j]);
+//        printf("\n");
+//
+//        // bloco de comando pra ver se o quick tá contando certo
+//        printf("quicj n_op: ");
+//        printf("%d ", quick(tempQ, 0, i));
+//        printf("\n");
+//
+//        // bloco de comando pra ver se o quick tá contando certo
+//        printf("shell n_op: ");
+//        printf("%d ", shell(tempS, i+1));
+//        printf("\n");
+//        printf("\n");
 
         // já da free de uma vez logo
         free(tempS);
